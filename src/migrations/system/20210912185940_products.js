@@ -1,5 +1,4 @@
-
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.raw(`
     CREATE TABLE IF NOT EXISTS products(
         product_id serial primary key not null,
@@ -9,9 +8,7 @@ exports.up = function(knex) {
         image varchar,
         created_at timestamptz 
     )
-  `)
+  `);
 };
 
-exports.down = function(knex) {
-  
-};
+exports.down = function (knex) {};

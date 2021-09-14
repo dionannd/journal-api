@@ -36,7 +36,7 @@ class ProductController {
         req.body
       );
 
-      res.status(200).send({ message: "Product berhasil ditambahkan", data });
+      res.status(200).send({ message: "Produk berhasil ditambahkan", data });
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
@@ -47,22 +47,36 @@ class ProductController {
       const { body } = req;
       body.product_id = req.params.id;
       body.image = req.file ? req.file.filename : null;
-      const selectProduct = await this.db.oneOrNone(
-        `select image from products where product_id = $1`,
-        req.params.id
-      );
-      if (selectProduct.image) {
-        fs.unlinkSync(`public/images/products/${selectProduct.image}`);
+
+      if (req.file) {
+        const selectProduct = await this.db.oneOrNone(
+          `select image from products where product_id = $1`,
+          req.params.id
+        );
+        if (selectProduct.image) {
+          fs.unlinkSync(`public/images/products/${selectProduct.image}`);
+        }
       }
+
       const data = await this.db.query(
         `
-                UPDATE products SET product_name = $<product_name>, qty = $<qty>, description = $<description>, image = $<image> WHERE product_id = $<product_id>
+                UPDATE products SET product_name = $<product_name>, qty = $<qty>, description = $<description> WHERE product_id = $<product_id>
                 RETURNING *
             `,
         req.body
       );
 
-      res.status(200).send({ message: "Product berhasil diperbarui", data });
+      if (req.file) {
+        await this.db.query(
+          `
+                UPDATE products SET image = $<image> WHERE product_id = $<product_id>
+                RETURNING *
+            `,
+          req.body
+        );
+      }
+
+      res.status(200).send({ message: "Product berhasil diperbarui" });
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
@@ -82,6 +96,20 @@ class ProductController {
         req.params.id
       );
       res.status(200).send({ message: "Product berhasil dihapus" });
+    } catch (error) {
+      res.status(500).send({ message: error.message });
+    }
+  };
+
+  detailProduct = async (req, res) => {
+    try {
+      const detailProduct = await this.db.oneOrNone(
+        `select * from products where product_id = $1`,
+        req.params.id
+      );
+      detailProduct.image = `${process.env.PUBLIC_PATH}/products/${detailProduct.image}`;
+
+      res.status(200).send({ data: detailProduct });
     } catch (error) {
       res.status(500).send({ message: error.message });
     }

@@ -9,5 +9,6 @@ app.get("/", handler.getProduct);
 app.post("/", upload.single("files"), handler.insertProduct);
 app.put("/:id", upload.single("files"), handler.editProduct);
 app.delete("/:id", handler.deleteProduct);
+app.get("/:id", handler.detailProduct);
 
 export default app;
