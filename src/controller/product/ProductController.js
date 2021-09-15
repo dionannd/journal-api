@@ -90,9 +90,7 @@ class ProductController {
       );
       await fs.unlinkSync(`public/images/products/${selectProduct.image}`);
       await this.db.query(
-        `
-                DELETE FROM products WHERE product_id = $1
-            `,
+        ` DELETE FROM products WHERE product_id = $1`,
         req.params.id
       );
       res.status(200).send({ message: "Product berhasil dihapus" });

@@ -34,6 +34,34 @@ class CategoryController {
       res.status(500).send({ message: error.message });
     }
   };
+
+  editCategory = async (req, res) => {
+    try {
+      const { body } = req;
+      body.category_id = req.params.id;
+
+      const data = await this.db.query(
+        `UPDATE categories SET category_name = $<category_name>, icon = $<icon> WHERE category_id = $<category_id>
+        RETURNING *`,
+        req.body
+      );
+      res.status(200).send({ message: "Category berhasil diperbarui" });
+    } catch (error) {
+      res.status(500).send({ message: error.message });
+    }
+  };
+
+  deleteCategory = async (req, res) => {
+    try {
+      await this.db.query(
+        `delete from categories where category_id = $1`,
+        req.params.id
+      );
+      res.status(200).send({ message: "Category berhasil dihapus" });
+    } catch (error) {
+      res.status(500).send({ message: error.message });
+    }
+  };
 }
 
 export default CategoryController;
