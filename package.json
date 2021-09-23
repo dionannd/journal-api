@@ -27,5 +27,15 @@
     "@babel/node": "^7.15.4",
     "@babel/preset-env": "^7.15.6",
     "nodemon": "^2.0.12"
-  }
+  },
+  "description": "Buku Catatan with Nodejs Reactjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dionannd/learn_backend_nodejs.git"
+  },
+  "author": "yons",
+  "bugs": {
+    "url": "https://github.com/dionannd/learn_backend_nodejs/issues"
+  },
+  "homepage": "https://github.com/dionannd/learn_backend_nodejs#readme"
 }
