@@ -41,9 +41,7 @@ class AuthController {
       if (!checkUser) {
         return res
           .status(400)
-          .send({
-            message: "Email yang anda masukan salah atau belum terdaftar.",
-          });
+          .send({ message: "Email yang anda masukan belum terdaftar." });
       }
       const comparePassword = Bcrypt.compareSync(
         body.password,

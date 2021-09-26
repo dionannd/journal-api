@@ -63,18 +63,6 @@ class TransactionController {
       res.status(500).send({ message: error.message });
     }
   };
-  detailTransaction = async (req, res) => {
-    try {
-      const detailTransaction = await this.db.oneOrNone(
-        `select * from transaction_headers where transaction_id = $1`,
-        req.params.id
-      );
-
-      res.status(200).send({ data: detailTransaction });
-    } catch (error) {
-      res.status(500).send({ message: error.message });
-    }
-  };
 }
 
 export default TransactionController;
