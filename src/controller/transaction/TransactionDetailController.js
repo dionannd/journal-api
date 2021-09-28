@@ -99,13 +99,9 @@ class TransactionDetailController {
         coalesce(sum(case td.tipe when 'pengeluaran' then amount end), 0) as pengeluaran
       from transaction_details td where transaction_id = $1
       `,
-        [id.transaction_id]
+        id
       );
-      const income = await this.db.one("select count(*) from pemasukan");
-      const loss = await this.db.one("select count(*) from pengeluaran");
-      res
-        .send(200)
-        .send({ data: result, totalIncome: income, totalLoss: loss });
+      res.status(200).send({ data: result[0] });
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
