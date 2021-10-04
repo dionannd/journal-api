@@ -5,10 +5,11 @@ class TransactionDetailController {
     this.db = mainDb;
   }
 
-  transactionDetail = async (req, res) => {
+  getTransactionDetail = async (req, res) => {
     try {
       const { id } = req.params;
       const { user } = req;
+
       const result = await this.db.oneOrNone(
         `select * from transaction_header where transaction_id = $1 and user_id = $2
       `,
@@ -20,10 +21,10 @@ class TransactionDetailController {
     }
   };
 
-  insertTransactionDetail = async (req, res) => {
+  saveTransactionDetail = async (req, res) => {
     try {
       const { body } = req;
-      body.user_id = req.user.id;
+      body.user_id = req.user.user_id;
       body.transaction_id = req.params.id;
       await this.db.query(
         `insert into transaction_details (transaction_id, description, tipe, amount, user_id, transaction_date) values ($<transaction_id>, $<description>, $<tipe>, $<amount>, $<user_id>, NOW())`,
@@ -65,7 +66,7 @@ class TransactionDetailController {
       );
 
       const total = await this.db.one(
-        "select count(*) from transaction_details"
+        `select count(*) from transaction_details`
       );
 
       return res
@@ -79,12 +80,14 @@ class TransactionDetailController {
   deleteTransactionDetail = async (req, res) => {
     try {
       const { body } = req;
+      console.log(body);
       await this.db.query(
         `delete from transaction_details where transaction_detail_id in ($1:csv)`,
         [body.transaction_id]
       );
       res.status(200).send({ message: "Transaksi berhasil dihapus" });
     } catch (error) {
+      console.log(error);
       res.status(500).send({ message: error.message });
     }
   };

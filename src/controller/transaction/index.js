@@ -6,14 +6,13 @@ const app = Router();
 const handler = new TransactionController();
 const route = new TransactionDetailController();
 
-app.get("/", handler.transaction);
-app.post("/", handler.insertTransaction);
-app.put("/:id", handler.editTransaction);
-app.delete("/:id", handler.deleteTransaction);
-
-app.get("/:id", route.getTipeDetail);
+app.get("/", handler.getTransaction);
+app.post("/save", handler.saveTransaction);
+app.delete("/:id/delete", handler.deleteTransaction);
+app.get("/:id", route.getTransactionDetail);
+app.post("/detail/:id/save", route.saveTransactionDetail);
 app.get("/detail/:id", route.listTransactionDetail);
-app.post("/detail/:id", route.insertTransactionDetail);
-app.delete("/detail/delete", route.deleteTransactionDetail);
+app.get("/detail/:id/tipe", route.getTipeDetail);
+app.delete("/detail/:id/delete", route.deleteTransactionDetail);
 
 export default app;

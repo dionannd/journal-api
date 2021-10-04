@@ -5,17 +5,28 @@ class TransactionController {
     this.db = mainDb;
   }
 
-  transaction = async (req, res) => {
+  getTransaction = async (req, res) => {
     try {
+      const { q } = req.query;
+      let where = "";
+      let bindParams = {
+        user_id: req.user.id,
+      };
+      if (q && q.length > 0) {
+        where += ` AND ((name ~* $<q>))`;
+        bindParams = { ...bindParams, q };
+      }
       const data = await this.db.query(
         `select th.*, (
           select coalesce(sum(amount), 0) as total
           from transaction_details td
           where td.transaction_id = th.transaction_id
         ) from transaction_headers th
-        where user_id = $1
-        group by th.transaction_id`,
-        req.user.id
+        where user_id = $<user_id>
+        ${where}
+        group by th.transaction_id
+        `,
+        bindParams
       );
       return res.status(200).send({ data });
     } catch (error) {
@@ -23,7 +34,7 @@ class TransactionController {
     }
   };
 
-  insertTransaction = async (req, res) => {
+  saveTransaction = async (req, res) => {
     try {
       const { body } = req;
       body.user_id = req.user.id;
@@ -37,26 +48,23 @@ class TransactionController {
     }
   };
 
-  editTransaction = async (req, res) => {
-    try {
-      const { body } = req;
-      body.transaction_header_id = req.params.id;
-      await this.db.query(
-        `update transaction_headers set name = $<name> where transaction_id = $<transaction_id>
-                returning *`,
-        body
-      );
-      res.status(200).send({ message: "Transaksi berhasil diperbaharui" });
-    } catch (error) {
-      res.status(500).send({ message: error.message });
-    }
-  };
-
   deleteTransaction = async (req, res) => {
     try {
+      const { id } = req.params;
+      const checkData = await this.db.one(
+        `
+        select count(*) from transaction_details where transaction_id = $1
+      `,
+        id
+      );
+
+      if (checkData && checkData.count > 0) {
+        return res.status(400).send({ message: "Data sedang digunakan" });
+      }
+
       await this.db.query(
         `delete from transaction_headers where transaction_id = $1`,
-        req.params.id
+        id
       );
       res.status(200).send({ message: "Transaksi berhasil dihapus" });
     } catch (error) {
