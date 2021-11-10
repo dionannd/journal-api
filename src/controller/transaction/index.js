@@ -7,7 +7,7 @@ const handler = new TransactionController();
 app.get("/:id", handler.getTransaction);
 app.post("/:id", handler.save);
 app.get("/list/:id", handler.list);
-app.get("/tipe/:id", handler.getTipe);
 app.delete("/:id", handler.delete);
+app.get("/tipe/:id", handler.getTipe);
 
 export default app;

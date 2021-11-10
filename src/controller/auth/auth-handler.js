@@ -27,6 +27,8 @@ class AuthController {
         return res.status(400).send({ message: "Recheck the form" });
       } else if (body.email === "") {
         return res.status(400).send({ message: "Recheck the form" });
+      } else if (body.password === "") {
+        return res.status(400).send({ message: "Recheck the form" });
       }
 
       const salt = Bcrypt.genSaltSync(15);

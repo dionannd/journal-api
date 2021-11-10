@@ -3,7 +3,7 @@ exports.up = function (knex) {
     `create table if not exists transactions(
           transaction_id serial primary key not null,
           journal_id integer,
-          description varchar not null,
+          name varchar not null,
           user_id integer,
           tipe varchar not null,
           amount numeric not null,

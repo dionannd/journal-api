@@ -7,29 +7,27 @@ class TransactionDetailController {
     this.repository = new TransactionRepository();
   }
 
-  getTransaction = async (req, res) => {
+  save = async (req, res) => {
     try {
-      const { id } = req.params;
-      const session = req;
-
-      const result = await this.repository.getTransaction(
-        this.db,
-        session.user_id,
-        id
-      );
-      return res.status(200).send({ data: result });
+      const { body } = req;
+      body.user_id = req.user.id;
+      body.journal_id = req.params.id;
+      await this.repository.insert(this.db, body);
+      return res.status(200).send({ message: "Saved successfully" });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
   };
 
-  save = async (req, res) => {
+  getTransaction = async (req, res) => {
     try {
-      const { body } = req;
-      body.user_id = req.user.user_id;
-      body.journal_id = req.params.id;
-      await this.repository.insert(this.db, body);
-      return res.status(200).send({ message: "Saved successfully" });
+      const session = req;
+      const result = await this.repository.getTransaction(
+        this.db,
+        session.params.id,
+        session.user.id
+      );
+      return res.status(200).send({ data: result });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
@@ -42,7 +40,7 @@ class TransactionDetailController {
       let limit = "";
       let where = "";
       let bindParams = {
-        transaction_id: id,
+        journal_id: id,
       };
       if (page) {
         const offset = (page - 1) * pageSize;
@@ -50,7 +48,7 @@ class TransactionDetailController {
         bindParams = { ...bindParams, pageSize };
       }
       if (q) {
-        where += ` AND ((description ~* $<q>))`;
+        where += ` AND ((name ~* $<q>))`;
         bindParams = { ...bindParams, q };
       }
       const result = await this.db.query(
@@ -76,14 +74,9 @@ class TransactionDetailController {
   delete = async (req, res) => {
     try {
       const { body } = req;
-      console.log(body);
-      await this.db.query(
-        `delete from transactions where transactionid in ($1:csv)`,
-        [body.journal_id]
-      );
+      await this.repository.delete(this.db, body);
       res.status(200).send({ message: "Transaction has been deleted" });
     } catch (error) {
-      console.log(error);
       res.status(500).send({ message: error.message });
     }
   };
@@ -91,15 +84,7 @@ class TransactionDetailController {
   getTipe = async (req, res) => {
     try {
       const { id } = req.params;
-      const result = await this.db.query(
-        `
-      select
-        coalesce(sum(case t.tipe when 'pemasukan' then amount end), 0) as pemasukan,
-        coalesce(sum(case t.tipe when 'pengeluaran' then amount end), 0) as pengeluaran
-      from transactions t where journal_id = $1
-      `,
-        id
-      );
+      const result = await this.repository.tipe(this.db, id);
       res.status(200).send({ data: result[0] });
     } catch (error) {
       res.status(500).send({ message: error.message });
