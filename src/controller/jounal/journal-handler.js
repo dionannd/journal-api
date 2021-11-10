@@ -22,7 +22,7 @@ class JournalController {
         `select j.*, (
           select coalesce(sum(amount), 0) as total
           from transactions t
-          where t.transaction_id = j.journal_id
+          where t.journal_id = j.journal_id
         ) from journals j
         where user_id = $<user_id>
         ${where}
@@ -59,7 +59,7 @@ class JournalController {
       const { id } = req.params;
       const checkData = await this.db.one(
         `
-        select count(*) from transactions where transaction_id = $1
+        select count(*) from transactions where journal_id = $1
       `,
         id
       );
