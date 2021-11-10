@@ -1,6 +1,6 @@
 import { mainDb } from "../../lib/db";
-import Bcrypt from "bcrypt";
 import { generateToken } from "../../lib/helpers";
+import Bcrypt from "bcrypt";
 
 class AuthController {
   constructor() {
@@ -16,18 +16,29 @@ class AuthController {
       );
 
       if (checkEmail) {
-        return res.status(400).send({ message: "Email sudah terdaftar" });
+        return res.status(400).send({ message: "Email already registered" });
       }
+
+      if (body.password_confirm !== body.password) {
+        return res.status(400).send({ message: "Password don't match" });
+      }
+
+      if (body.name === "") {
+        return res.status(400).send({ message: "Recheck the form" });
+      } else if (body.email === "") {
+        return res.status(400).send({ message: "Recheck the form" });
+      }
+
       const salt = Bcrypt.genSaltSync(15);
       body.password = Bcrypt.hashSync(body.password, salt);
 
       await this.db.query(
-        `insert into users (email, password) values ($<email>, $<password>)`,
+        `insert into users (name, email, password) values ($<name>, $<email>, $<password>)`,
         body
       );
-      res.status(200).send({ message: "Telah berhasil register" });
+      return res.status(200).send({ message: "Registered successfully" });
     } catch (error) {
-      res.status(500).send({ message: error.message });
+      return res.status(500).send({ message: error.message });
     }
   };
 
@@ -39,24 +50,20 @@ class AuthController {
         body.email
       );
       if (!checkUser) {
-        return res
-          .status(400)
-          .send({ message: "Email yang anda masukan belum terdaftar." });
+        return res.status(400).send({ message: "Wrong email or unregistered" });
       }
       const comparePassword = Bcrypt.compareSync(
         body.password,
         checkUser.password
       );
       if (!comparePassword) {
-        return res
-          .status(400)
-          .send({ message: "Email atau password yang anda masukan salah." });
+        return res.status(400).send({ message: "Wrong email or password." });
       }
 
       const token = await generateToken(checkUser);
       return res
         .status(200)
-        .send({ message: "Login berhasil", user: checkUser, token });
+        .send({ message: "Login success", user: checkUser, token });
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
