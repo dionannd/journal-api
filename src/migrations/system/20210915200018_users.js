@@ -1,14 +1,12 @@
-
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.raw(
-      `create table if not exists users(
+    `create table if not exists users(
           user_id serial primary key not null,
-          email varchar,
-          password varchar
+          name varchar not null,
+          email varchar not null,
+          password varchar not null
       )`
-  )
+  );
 };
 
-exports.down = function(knex) {
-  
-};
+exports.down = function (knex) {};

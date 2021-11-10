@@ -1,18 +1,13 @@
 import { Router } from "express";
-import TransactionController from "./TransactionController";
-import TransactionDetailController from "./TransactionDetailController";
+import TransactionController from "./transaction-handler";
 
 const app = Router();
 const handler = new TransactionController();
-const route = new TransactionDetailController();
 
-app.get("/", handler.getTransaction);
-app.post("/save", handler.saveTransaction);
-app.delete("/:id/delete", handler.deleteTransaction);
-app.get("/:id", route.getTransactionDetail);
-app.post("/detail/:id/save", route.saveTransactionDetail);
-app.get("/detail/:id", route.listTransactionDetail);
-app.get("/detail/:id/tipe", route.getTipeDetail);
-app.delete("/detail/:id/delete", route.deleteTransactionDetail);
+app.get("/:id", handler.getTransactionDetail);
+app.post("/detail/:id/save", handler.saveTransactionDetail);
+app.get("/detail/:id", handler.listTransactionDetail);
+app.get("/detail/:id/tipe", handler.getTipeDetail);
+app.delete("/detail/:id/delete", handler.deleteTransactionDetail);
 
 export default app;
