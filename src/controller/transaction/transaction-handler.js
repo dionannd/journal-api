@@ -1,19 +1,21 @@
 import { mainDb } from "../../lib/db";
+import TransactionRepository from "./transaction-repository";
 
 class TransactionDetailController {
   constructor() {
     this.db = mainDb;
+    this.repository = new TransactionRepository();
   }
 
-  getTransactionDetail = async (req, res) => {
+  getTransaction = async (req, res) => {
     try {
       const { id } = req.params;
-      const { user } = req;
+      const session = req;
 
-      const result = await this.db.oneOrNone(
-        `select * from transaction_header where transaction_id = $1 and user_id = $2
-      `,
-        [id, user.user_id]
+      const result = await this.repository.getTransaction(
+        this.db,
+        session.user_id,
+        id
       );
       return res.status(200).send({ data: result });
     } catch (error) {
@@ -21,22 +23,19 @@ class TransactionDetailController {
     }
   };
 
-  saveTransactionDetail = async (req, res) => {
+  save = async (req, res) => {
     try {
       const { body } = req;
       body.user_id = req.user.user_id;
-      body.transaction_id = req.params.id;
-      await this.db.query(
-        `insert into transaction_details (transaction_id, description, tipe, amount, user_id, transaction_date) values ($<transaction_id>, $<description>, $<tipe>, $<amount>, $<user_id>, NOW())`,
-        body
-      );
-      res.status(200).send({ message: "Transaksi berhasil ditambahkan" });
+      body.journal_id = req.params.id;
+      await this.repository.insert(this.db, body);
+      return res.status(200).send({ message: "Saved successfully" });
     } catch (error) {
-      res.status(500).send({ message: error.message });
+      return res.status(500).send({ message: error.message });
     }
   };
 
-  listTransactionDetail = async (req, res) => {
+  list = async (req, res) => {
     try {
       const { id } = req.params;
       const { page, pageSize, q } = req.query;
@@ -56,8 +55,8 @@ class TransactionDetailController {
       }
       const result = await this.db.query(
         `
-      select * from transaction_details
-      where transaction_id = $<transaction_id>
+      select * from transactions
+      where journal_id = $<journal_id>
       ${where}
       order by transaction_date desc
       ${limit}
@@ -65,10 +64,7 @@ class TransactionDetailController {
         bindParams
       );
 
-      const total = await this.db.one(
-        `select count(*) from transaction_details`
-      );
-
+      const total = await this.db.one(`select count(*) from transactions`);
       return res
         .status(200)
         .send({ data: result, totalCount: Number(total.count) });
@@ -77,30 +73,30 @@ class TransactionDetailController {
     }
   };
 
-  deleteTransactionDetail = async (req, res) => {
+  delete = async (req, res) => {
     try {
       const { body } = req;
       console.log(body);
       await this.db.query(
-        `delete from transaction_details where transaction_detail_id in ($1:csv)`,
-        [body.transaction_id]
+        `delete from transactions where transactionid in ($1:csv)`,
+        [body.journal_id]
       );
-      res.status(200).send({ message: "Transaksi berhasil dihapus" });
+      res.status(200).send({ message: "Transaction has been deleted" });
     } catch (error) {
       console.log(error);
       res.status(500).send({ message: error.message });
     }
   };
 
-  getTipeDetail = async (req, res) => {
+  getTipe = async (req, res) => {
     try {
       const { id } = req.params;
       const result = await this.db.query(
         `
       select
-        coalesce(sum(case td.tipe when 'pemasukan' then amount end), 0) as pemasukan,
-        coalesce(sum(case td.tipe when 'pengeluaran' then amount end), 0) as pengeluaran
-      from transaction_details td where transaction_id = $1
+        coalesce(sum(case t.tipe when 'pemasukan' then amount end), 0) as pemasukan,
+        coalesce(sum(case t.tipe when 'pengeluaran' then amount end), 0) as pengeluaran
+      from transactions t where journal_id = $1
       `,
         id
       );

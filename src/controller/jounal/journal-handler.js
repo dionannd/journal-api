@@ -40,8 +40,15 @@ class JournalController {
     try {
       const { body } = req;
       const session = req.user;
+
+      if (body.name === "") {
+        return res.status(400).send({ message: "Recheck the form" });
+      } else if (body.description === "") {
+        return res.status(400).send({ message: "Recheck the form" });
+      }
+
       await this.repository.insert(this.db, session, body);
-      return res.status(200).send({ message: "Save successfully added" });
+      return res.status(200).send({ message: "Saved successfully" });
     } catch (error) {
       return res.status(500).send({ message: error.message });
     }
@@ -50,7 +57,7 @@ class JournalController {
   delete = async (req, res) => {
     try {
       const { id } = req.params;
-      const checkData = await db.one(
+      const checkData = await this.db.one(
         `
         select count(*) from transactions where transaction_id = $1
       `,
