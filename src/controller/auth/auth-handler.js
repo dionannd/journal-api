@@ -61,9 +61,7 @@ class AuthController {
       }
 
       const token = await generateToken(checkUser);
-      return res
-        .status(200)
-        .send({ message: "Login success", user: checkUser, token });
+      return res.status(200).send({ message: "Login success", token });
     } catch (error) {
       res.status(500).send({ message: error.message });
     }

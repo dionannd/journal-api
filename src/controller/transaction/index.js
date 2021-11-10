@@ -4,10 +4,10 @@ import TransactionController from "./transaction-handler";
 const app = Router();
 const handler = new TransactionController();
 
-app.get("/:id", handler.getTransactionDetail);
-app.post("/detail/:id/save", handler.saveTransactionDetail);
-app.get("/detail/:id", handler.listTransactionDetail);
-app.get("/detail/:id/tipe", handler.getTipeDetail);
-app.delete("/detail/:id/delete", handler.deleteTransactionDetail);
+app.get("/:id", handler.getTransaction);
+app.post("/:id", handler.save);
+app.get("/list/:id", handler.list);
+app.get("/tipe/:id", handler.getTipe);
+app.delete("/:id", handler.delete);
 
 export default app;

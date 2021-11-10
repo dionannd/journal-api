@@ -4,8 +4,8 @@ import JournalController from "./journal-handler";
 const app = Router();
 const handler = new JournalController();
 
-app.get("/", handler.getTransaction);
-app.post("/save", handler.saveTransaction);
-app.delete("/:id/delete", handler.deleteTransaction);
+app.get("/", handler.getList);
+app.post("/", handler.save);
+app.delete("/:id", handler.delete);
 
 export default app;
